@@ -3,13 +3,13 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.streaming.SXSSFWorkbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.joda.time.DateTime;
 import org.junit.jupiter.api.Test;
 
-import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.IOException;
+
 
 public class ExcelWriteTest {
 
@@ -53,6 +53,46 @@ public class ExcelWriteTest {
     }
 
 
+    @Test
+    public void xlsBigDataWrite() throws Exception {
+
+        long begin = System.currentTimeMillis();
+
+
+        // 1. create a workbook
+        Workbook workbook = new HSSFWorkbook();
+
+        // 2. create a sheet
+        Sheet sheet = workbook.createSheet("xlsBigData");
+
+        // 3. for loop to create cell, begin with 0
+        // java.lang.IllegalArgumentException: Invalid row number (65536) outside allowable range (0..65535)
+        for (int i = 0; i < 65536; i++) {
+            Row row = sheet.createRow(i);
+            for (int j = 0; j < 10; j++) {
+                Cell cell = row.createCell(j);
+                cell.setCellValue(j);
+            }
+        }
+
+        // 4. create a File
+        FileOutputStream fileOutputStream = new FileOutputStream(path + "xlsBigDataWrite.xls");
+
+        workbook.write(fileOutputStream);
+        // close
+        fileOutputStream.close();
+
+        System.out.println("xlsBigDataWrite.xls has been created.");
+
+
+        long end = System.currentTimeMillis();
+
+
+        System.out.println("Time:" + (double) (end - begin)/1000);
+
+    }
+
+
 
     @Test
     public void xlsxWrite() throws Exception {
@@ -92,6 +132,91 @@ public class ExcelWriteTest {
     }
 
 
+    // take long time, Time:19.509s for 100000
+    @Test
+    public void xlsxBigDataWrite() throws Exception {
+
+        long begin = System.currentTimeMillis();
+
+
+        // 1. create a workbook
+        Workbook workbook = new XSSFWorkbook();
+
+        // 2. create a sheet
+        Sheet sheet = workbook.createSheet("xlsxBigData");
+
+        // 3. for loop to create cell, begin with 0
+        // java.lang.IllegalArgumentException: Invalid row number (65536) outside allowable range (0..65535)
+        for (int i = 0; i < 100000; i++) {
+            Row row = sheet.createRow(i);
+            for (int j = 0; j < 10; j++) {
+                Cell cell = row.createCell(j);
+                cell.setCellValue(j);
+            }
+        }
+
+        // 4. create a File
+        FileOutputStream fileOutputStream = new FileOutputStream(path + "xlsxBigDataWrite.xlsx");
+
+        workbook.write(fileOutputStream);
+        // close
+        fileOutputStream.close();
+
+        System.out.println("xlsxBigDataWrite.xlsx has been created.");
+
+
+        long end = System.currentTimeMillis();
+
+
+        System.out.println("Time:" + (double) (end - begin)/1000);
+
+    }
+
+
+
+
+
+    // take less time, Time:6.049 for 100000, will generate a temporary file
+    @Test
+    public void xlsxBigDataEnhanceWrite() throws Exception {
+
+        long begin = System.currentTimeMillis();
+
+
+        // 1. create a workbook
+        Workbook workbook = new SXSSFWorkbook();
+
+        // 2. create a sheet
+        Sheet sheet = workbook.createSheet("xlsxBigDataEnhance");
+
+        // 3. for loop to create cell, begin with 0
+        // java.lang.IllegalArgumentException: Invalid row number (65536) outside allowable range (0..65535)
+        for (int i = 0; i < 100000; i++) {
+            Row row = sheet.createRow(i);
+            for (int j = 0; j < 10; j++) {
+                Cell cell = row.createCell(j);
+                cell.setCellValue(j);
+            }
+        }
+
+        // 4. create a File
+        FileOutputStream fileOutputStream = new FileOutputStream(path + "xlsxBigDataEnhanceWrite.xlsx");
+
+        workbook.write(fileOutputStream);
+        // close temporary file
+        fileOutputStream.close();
+        // clean
+        ((SXSSFWorkbook) workbook).dispose();
+
+        System.out.println("xlsxBigDataEnhanceWrite.xlsx has been created.");
+
+
+        long end = System.currentTimeMillis();
+
+
+        System.out.println("Time:" + (double) (end - begin)/1000);
+
+    }
 
 
 }
